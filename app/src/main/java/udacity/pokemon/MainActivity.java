@@ -28,7 +28,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -64,6 +67,22 @@ public class MainActivity extends AppCompatActivity {
             String jsonString = "";
             try {
                 // TODO: make a request to the URL
+                URL urlObject = createUrl(url);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) urlObject.openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setConnectTimeout(10000);
+                httpURLConnection.setReadTimeout(10000);
+                httpURLConnection.connect();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                StringBuilder stringBuilder = new StringBuilder();
+
+                String line = null;
+                while((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+
+                jsonString = stringBuilder.toString();
 
             } catch (IOException e) {
                 return null;
@@ -73,14 +92,19 @@ public class MainActivity extends AppCompatActivity {
             if (jsonString != null) {
                 try {
                     //TODO: Create a new JSONObject
+                    JSONObject responseJson = new JSONObject(jsonString);
 
                     // TODO: Get the JSON Array node and name it "pokemons"
-
+                    JSONArray pokemons = responseJson.getJSONArray("pokemon");
 
                     // looping through all Contacts
                     for (int i = 0; i < pokemons.length(); i++) {
                         //TODO: get the JSONObject and its three attributes
+                        JSONObject pokemonObject = (JSONObject) pokemons.get(i);
 
+                        String name = pokemonObject.getString("name");
+                        String id = pokemonObject.getString("id");
+                        String candy = pokemonObject.getString("candy");
 
                         // tmp hash map for a single pokemon
                         HashMap<String, String> pokemon = new HashMap<>();
